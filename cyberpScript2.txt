@@ -1,0 +1,91 @@
+@echo OFF
+title CyberP Script 
+@echo OFF
+echo This is the start of the CyberP script.
+REM There are further scripts for the following actions: Pulling up a list of “bad” files from all users, TBC.
+REM https://github.com/VBQL/CyberPatriotScripts/commit/824ab3f40cb8f007d9a2e5b9abbdbf0f7a0c4833
+REM MANUALLY: edit autoupdates through group policy (in administrative templates, windows components)
+REM must enable "enforce complexity requirment" AND disable "store password using reversible encryption" (in account password policy editor, local security policy program)
+REM must do user rights assignment (remove 'everyone') in local security policy
+REM must allow trusted programs by adding to firewall exception list
+REM must modify settings in privacy tab of the UAC script  
+REM must find "weak" services and remove them
+pause
+echo The UAC Menu will now be Pulled Up to Alter.
+C:\Windows\System32\UserAccountControlSettings.exe
+pause
+netsh advfirewall firewall add rule name="FTP Port Closed" dir=in action=block protocol=TCP localport=%21
+netsh advfirewall firewall add rule name="SSH Port Closed" dir=in action=block protocol=TCP localport=%22
+netsh advfirewall firewall add rule name="TelNet Port Closed" dir=in action=block protocol=TCP localport=%23
+netsh advfirewall firewall add rule name="SNMP Port Closed" dir=in action=block protocol=UDP localport=%162
+netsh advfirewall firewall add rule name="LDAP Port Closed" dir=in action=block protocol=TCP localport=%636
+netsh advfirewall firewall add rule name="RDP Port Closed" dir=in action=block protocol=TCP localport=%3389
+echo Ports Config Complete.
+pause
+echo Service script
+sc config TermService start= disabled
+
+sc config SharedAccess start= disabled
+
+sc config UmRdpService start= disabled
+
+sc config RemoteRegistry start= disabled
+
+sc config SessionEnv start= disabled
+
+sc config SSDPSRV start= disabled
+
+sc config upnphost start= disabled
+
+sc config wuauserv start= enabled
+
+sc config tlntsvr start= disabled
+
+sc config Telephony start= disabled
+
+sc config p2pimsvc start= disabled
+
+sc config simtcp start= disabled
+
+sc config msftpsvc start= disabled
+
+sc config RemoteAccess start= disabled
+pause
+echo Policy script
+Auditpol /set /category:"Account Logon" /Success:disable /failure:enable
+Auditpol /set /category:"Account Management" /Success:disable /failure:enable
+Auditpol /set /category:"DS Access" /Success:disable  /failure:enable
+Auditpol /set /category:"Logon/Logoff"  /Success:disable /failure:enable
+Auditpol /set /category:"Object Access" /Success:enable  /failure:disable
+Auditpol /set /category:"policy change"  /Success:disable /failure:enable
+Auditpol /set /category:"Privilege use" /Success:enable  /failure:disable
+Auditpol /set /category:"Process tracking"  /Success:disable /failure:enable
+Auditpol /set /category:"System"  /Success:disable /failure:enable
+pause
+echo Password policies script 
+net accounts /minpwlen:10
+net accounts /maxpwage:30
+net accounts /minpwage:5
+net accounts /uniquepw:5
+net accounts /lockoutduration:30
+pause
+echo More Firewall settings config.
+netsh advfirewall set publicprofile state on
+netsh advfirewall set privateprofile state on
+netsh advfirewall set privateprofile firewallpolicy blockinboundalways,allowoutbound
+netsh advfirewall set publicprofile firewallpolicy blockinboundalways,allowoutbound
+pause
+echo turnin on auto updates.
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update" /v AUOptions /t REG_DWORD /d 3 /f
+pause
+echo This is the List of Users~
+set allUsers="dir C:\Users /b"
+for /F "tokens=1*" %%G in ('%allUsers%') DO (
+	echo %%G
+)
+echo This is the End of the List~
+
+
+
+
+
