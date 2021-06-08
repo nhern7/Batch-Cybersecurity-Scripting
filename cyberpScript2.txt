@@ -2,15 +2,10 @@
 title CyberP Script 
 @echo OFF
 echo This is the start of the CyberP script.
-REM There are further scripts for the following actions: Pulling up a list of ìbadî files from all users, TBC.
+
+REM There are more scripts for the following actions: Getting a list of ‚Äúbad‚Äù files from all users,
 REM https://github.com/VBQL/CyberPatriotScripts/commit/824ab3f40cb8f007d9a2e5b9abbdbf0f7a0c4833
-REM MANUALLY: edit autoupdates through group policy (in administrative templates, windows components)
-REM must enable "enforce complexity requirment" AND disable "store password using reversible encryption" (in account password policy editor, local security policy program)
-REM must do user rights assignment (remove 'everyone') in local security policy
-REM must allow trusted programs by adding to firewall exception list
-REM must modify settings in privacy tab of the UAC script  
-REM must find "weak" services and remove them
-pause
+
 echo The UAC Menu will now be Pulled Up to Alter.
 C:\Windows\System32\UserAccountControlSettings.exe
 pause
